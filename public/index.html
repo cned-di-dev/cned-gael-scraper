@@ -3,12 +3,122 @@
   <head>
     <meta charset="utf-8">
     <title>CNED GAEL Scrapper</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" media="screen" title="no title" charset="utf-8">
+    <style media="screen">
+      .title {
+        line-height: 3;
+      }
+      .container {
+        max-width: 50%;
+        margin: 0 auto;
+      }
+      #serverResponse.loading {
+        min-height: 60px;
+        background: url('http://i1.wp.com/cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif?resize=48%2C48') center center no-repeat;
+      }
+        #serverResponse.loading table, #serverResponse.init table{
+            display: none;
+        }
+      #log {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        background: #fff;
+        width: 30%;
+        overflow: hidden;
+      }
+    </style>
   </head>
   <body>
-    <h1>CNED GAEL Scrapper</h1>
-    <form action="/getCopies" method="post">
-      <input type="text" name="userArray" id="userArray" value="">
-      <input type="submit" value="Ok" id="btnSubmit">
-    </form>
+    <main class="container">
+      <h1 class="title text-center">CNED GAEL Scrapper</h1>
+      <form action="/" id="searchForm" method="post" class="text-center">
+        <div class="form-group">
+          <label for="userArray">Identifiants utilisateur : </label><input class="form-control" type="text" name="userArray" id="userArray" placeholder="ID d'apprenants séparés par un espace, ex: 2-250-A0-0085-2 2-250-A0-0124-2">
+        </div>
+        <button class="btn btn-primary" type="submit" id="btnSubmit">Rechercher</button>
+      </form>
+      <div class="row init" id="serverResponse">
+        <table  class="table table-striped">
+          <thead>
+            <tr>
+              <th>
+                ID
+              </th>
+              <th>
+                Nom
+              </th>
+              <th>
+                Nombre de copies statut "I" et "C"
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+      <form action="/closeSession" id="closeForm" method="post" class="text-center">
+        <button class="btn btn-default" type="submit" id="btnCloseSession">Fermer la session GAEL</button>
+      </form>
+      <div id="log">
+
+      </div>
+    </main>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script type="text/javascript">
+      var socket = io(),
+          searchForm = $('#searchForm'),
+          closeForm = $('#closeForm'),
+          msgContainer = $('#serverResponse'),
+          log = $('#log');
+      searchForm.on('submit', function (e) {
+        e.preventDefault();
+        var url = $(this).attr('action');
+        var data = {
+          userArray : $('#userArray').val()
+        };
+        msgContainer.find('tbody').html('');
+        msgContainer.addClass('loading');
+        $.post(url, data);
+        log.html('<p>Traitement de la requête : </p>');
+      });
+      // searchForm.on('submit', function (e) {
+      //   e.preventDefault();
+      //   var url = $(this).attr('action');
+      //   $.post(url);
+      // });
+      $(document).on('click', 'td a', function (e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        var data = {
+          userArray : $(this).text()
+        };
+        $.post(url, data);
+      });
+      socket.on('user found', function(user){
+        console.log('Socket event received : ', user);
+        user = user.user;
+        var html = '<p class="user">'+user[0]+' '+user[1]+' '+user[2]+'</p>';
+
+        log.append(html);
+       });
+       socket.on('error GAEL', function(msg){
+         alert(msg.msg);
+      });
+      socket.on('data ready', function(data){
+        console.log('Socket event received : ', data.data[0]);
+        var html = '';
+        for(var i = 0; i < data.data.length; i++){
+          html += '<tr><td><a href="/user-info">'+data.data[i][0]+'</a></td><td>'+data.data[i][1]+'</td><td>'+data.data[i][2]+'</td></tr>';
+        }
+        msgContainer.find('tbody').html(html);
+        msgContainer.removeClass('loading init');
+     });
+    </script>
   </body>
 </html>
