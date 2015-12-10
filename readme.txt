@@ -8,7 +8,7 @@ CNED GAEL NodeJS Scraper
 
 Installation :
 --------------
-- Assurez-vous d'avoir téléchargé/installé NodeJS pour Windows : https://nodejs.org
+- Assurez-vous d'avoir téléchargé/installé NodeJS pour Windows : https://nodejs.org (préférez la version LTS)
 - Récupérer la dernière version du programme (archive transmise par mail)
 - Créer un nouveau dossier dans votre dossier personnel (ex: C:\users\votrecompte)
 - Dans ce dossier nouvellement créé, décompresser l'archive
