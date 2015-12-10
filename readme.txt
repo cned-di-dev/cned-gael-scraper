@@ -18,7 +18,8 @@ Installation :
     -- last-step.png
     -- package.json
     -- server.js
-
+    -- readme.txt
+    
 
 Lancement du programme :
 ------------------------
