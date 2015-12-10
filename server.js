@@ -131,7 +131,7 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 															}
 															else if(i === userArray.length){
 																console.log('data ready : ', data);
-																io.emit('data ready', { data : data});
+																io.emit('list users ready', { data : data});
 															}
 
 														}
@@ -163,33 +163,10 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 			  });
 		},
 		horsemanGetUser = function (arr) {
-			console.log(i, arr.length);
+			console.log(arr);
 			horseman = new Horseman();
 
-			 userID = arr[i].split('-');
-			switch(userID[1]){
-				case "251":
-			    pages = 2;
-			    break;
-				case "252":
-					pages = 4;
-					break;
-				case "253":
-					pages = 2;
-					break;
-				case "256":
-					pages = 8;
-					break;
-				case "257":
-					pages = 1;
-					break;
-				case "258":
-					pages = 8;
-					break;
-				case "259":
-					pages = 3;
-					break;
-			}
+			 userID = arr.split('-');
 			horseman
 			  .open(url)
 				// LOG
@@ -226,34 +203,118 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 				// Ecran NOTES
 				.html()
 				.then(function(html){
-					// NOTES : first page
-					var j = 0,
-							name = $(html).find('.line4.col57').text(),
-							count = 0,
-							user = [userID.join('-'), name, 0],
-							getNotesOnPage = function () {
+							var j = 1,
+									name = $(html).find('.line4.col57').text(),
+									count = 0,
+									user = [userID.join('-'), name, count],
+									copies = [];
+								switch(userID[1]){
+									case "251":
+								    pages = 2;
+								    break;
+									case "252":
+										pages = 4;
+										break;
+									case "253":
+										pages = 2;
+										break;
+									case "256":
+										pages = 8;
+										break;
+									case "257":
+										pages = 1;
+										break;
+									case "258":
+										pages = 8;
+										break;
+									case "259":
+										pages = 3;
+										break;
+								}
+							if(name === ''){
+								io.emit('error GAEL', { msg : 'Il y a un problème de connexion avec GAEL, êtes-vous sûr d\'avoir fermé la connexion à GAEL ?'});
+							}
+							var findNotesAndPush = function (html) {
 
-										horseman
-											.click('[name="DFH_ENTER"]')
-											.waitForNextPage()
-											.html()
-											.then(function (html) {
-												console.log('count = '+$(html).find("input[value='I'] input[value='C']").length);
-												count += $(html).find("input[value='I'] input[value='C']").length;
-												if(j < pages*2){
-													getNotesOnPage();
-													j++;
-												}
-												if( j === pages*2-1){
+								//console.log(html);
+								var jQuery = $.load(html);
+								console.log('findNotesAndPush : '+$(html).find("input[value='C'], input[value='I']").length);
+								$(html).find("input[value='C'], input[value='I']").each(function(){
+									var that = $(this),
+											allClasses = that.attr('class'),
+											regex = /(?:^|\W)line(\w+)(?!\w)/g,
+											line = '.'+regex.exec(allClasses)[0].replace(' ', '');
 
-													io.emit('data ready', { data : user});
-												}
-											});
 
+
+									var copy = {
+										arrivedDay : jQuery(line+'.col52').val(),
+										arrivedMonth : jQuery(line+'.col55').val(),
+										arrivedYear : jQuery(line+'.col58').val(),
+										returnDay : jQuery(line+'.col65').val(),
+										returnMonth : jQuery(line+'.col68').val(),
+										returnYear : jQuery(line+'.col71').val(),
+										note : jQuery(line+'.col28').val(),
+										currentStatus : jQuery(line+'.col18').val(),
+										corrId : jQuery(line+'.col39').val()
+									};
+
+
+											console.log('copy : '+ copy);
+											copies.push(copy);
+									});
 							};
-					if(name === ''){
-						io.emit('error GAEL', { msg : 'Il y a un problème de connexion avec GAEL, êtes-vous sûr d\'avoir fermé la connexion à GAEL ?'});
-					}
+							var getNotesOnPage = function () {
+												//console.info('get note on page '+j+' for user :'+userID.join('-'));
+												horseman
+													.click('[name="DFH_ENTER"]')
+													.waitForNextPage()
+													.html()
+													.then(function (html) {
+
+														// user[2] += $(html).find("input[value='I']").length;
+														// user[2] += $(html).find("input[value='C']").length;
+														findNotesAndPush(html);
+
+
+														if(j < pages*2){
+															j++;
+															getNotesOnPage();
+
+														}
+														else if( j === pages*2){
+
+															//console.log('data ready : ', copies);
+															io.emit('list notes ready', { copies : copies, name : name});
+															horseman
+																.viewport(800,600)
+																.screenshot('last-step.png')
+																.type('[name="F3_19"]', 'BYE')
+																.click('[name="DFH_ENTER"]')
+																.waitForNextPage()
+																.close();
+															i++;
+															if(i === userArray.length){
+
+															}
+
+														}
+													});
+
+									};
+					//console.info('get note on first page for user :'+userID.join('-'));
+					// user[2] += $(html).find("input[value='I']").length;
+					// user[2] += $(html).find("input[value='C']").length;
+					findNotesAndPush(html);
+
+					j++;
+					//console.log(html);
+					getNotesOnPage();
+
+
+
+
+
 
 
 
@@ -310,16 +371,26 @@ app.post('/', function(req, res) {
 		data = [];
 		horsemanIterate(userArray);
 });
-app.post("/user-info", function (req, res) {
+app.get("/userList", function (req, res) {
 
-	userArray = req.body.userArray;
-	console.info('Request started with : ', userArray);
-	horsemanGetUser(userArray);
-	res.sendFile("/user-info.html");
+	res.sendFile(publicDir+"/list-all-users.html");
+
 });
 app.post('/closeSession', function(req, res) {
 		horsemanCloseSession();
-		res.sendFile("/index.html");
+		//res.sendFile("/index.html");
+});
+app.get("/userInfo", function (req, res) {
+
+	userArray = req.query.id;
+	console.info('Request started with : ', userArray);
+
+	res.sendFile(publicDir+"/user-info.html");
+	horsemanGetUser(userArray);
+});
+app.post('/closeSession', function(req, res) {
+		horsemanCloseSession();
+		//res.sendFile("/index.html");
 });
 // Server launch
 server.listen(1234);

@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>CNED GAEL Scrapper</title>
+    <title>CNED GAEL Scraper</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" media="screen" title="no title" charset="utf-8">
     <style media="screen">
       .title {
@@ -31,7 +31,7 @@
   </head>
   <body>
     <main class="container">
-      <h1 class="title text-center">CNED GAEL Scrapper</h1>
+      <h1 class="title text-center">CNED GAEL Scraper</h1>
       <form action="/" id="searchForm" method="post" class="text-center">
         <div class="form-group">
           <label for="userArray">Identifiants utilisateur : </label><input class="form-control" type="text" name="userArray" id="userArray" placeholder="ID d'apprenants séparés par un espace, ex: 2-250-A0-0085-2 2-250-A0-0124-2">
@@ -92,14 +92,12 @@
       //   var url = $(this).attr('action');
       //   $.post(url);
       // });
-      $(document).on('click', 'td a', function (e) {
-        e.preventDefault();
-        var url = $(this).attr('href');
-        var data = {
-          userArray : $(this).text()
-        };
-        $.post(url, data);
-      });
+      // $(document).on('click', 'td a', function (e) {
+      //   e.preventDefault();
+      //   console.log('clicked');
+      //   var url = 'userInfo/?id='+$(this).attr('href');
+      //   $.post(url);
+      // });
       socket.on('user found', function(user){
         console.log('Socket event received : ', user);
         user = user.user;
@@ -110,15 +108,33 @@
        socket.on('error GAEL', function(msg){
          alert(msg.msg);
       });
-      socket.on('data ready', function(data){
+      socket.on('list users ready', function(data){
         console.log('Socket event received : ', data.data[0]);
         var html = '';
         for(var i = 0; i < data.data.length; i++){
-          html += '<tr><td><a href="/user-info">'+data.data[i][0]+'</a></td><td>'+data.data[i][1]+'</td><td>'+data.data[i][2]+'</td></tr>';
+          html += '<tr><td><a href="/userInfo/?id='+data.data[i][0]+'">'+data.data[i][0]+'</a></td><td>'+data.data[i][1]+'</td><td>'+data.data[i][2]+'</td></tr>';
         }
         msgContainer.find('tbody').html(html);
         msgContainer.removeClass('loading init');
      });
+    //  socket.on('list notes ready', function(data){
+    //    console.log('Socket event received : ', data.copies);
+    //    var statusMsg;
+    //
+    //    var html = '<h2>'+data.name+'</h2><table>';
+    //    for(var i = 0; i <data.copies.length; i++){
+    //      if(data.copies[i].currentStatus === 'C'){
+    //        statusMsg = 'Corrigée, note :'+data.copies[i].note;
+    //      }
+    //      else {
+    //        statusMsg = 'Pas encore corrigée';
+    //      }
+    //      html += '<tr><td>'+data.copies[i].arrivedDay+'/'+data.copies[i].arrivedMonth+'/'+data.copies[i].arrivedYear+'</td><td>'+statusMsg+'</td><td>'+data.copies[i][2]+'</td></tr>';
+    //    }
+    //    html += '</table>';
+    //    msgContainer.find('tbody').html(html);
+    //    msgContainer.removeClass('loading init');
+    // });
     </script>
   </body>
 </html>
