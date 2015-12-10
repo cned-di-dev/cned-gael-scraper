@@ -32,38 +32,11 @@
   <body>
     <main class="container">
       <h1 class="title text-center">CNED GAEL Scraper</h1>
-      <form action="/" id="searchForm" method="post" class="text-center">
-        <div class="form-group">
-          <label for="userArray">Identifiants utilisateur : </label><input class="form-control" type="text" name="userArray" id="userArray" placeholder="ID d'apprenants séparés par un espace, ex: 2-250-A0-0085-2 2-250-A0-0124-2">
-        </div>
-        <button class="btn btn-primary" type="submit" id="btnSubmit">Rechercher</button>
-      </form>
-      <div class="row init" id="serverResponse">
-        <table  class="table table-striped">
-          <thead>
-            <tr>
-              <th>
-                ID
-              </th>
-              <th>
-                Nom
-              </th>
-              <th>
-                Nombre de copies statut "I" et "C"
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+      <h2 class="text-center">Liste des inscrits</h2>
+      <ul id="list-users">
 
-          </tbody>
-        </table>
-      </div>
-      <form action="/closeSession" id="closeForm" method="post" class="text-center">
-        <button class="btn btn-default" type="submit" id="btnCloseSession">Fermer la session GAEL</button>
-      </form>
-      <div id="log">
+      </ul>
 
-      </div>
     </main>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -71,57 +44,26 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <script type="text/javascript">
-      var socket = io(),
-          searchForm = $('#searchForm'),
-          closeForm = $('#closeForm'),
-          msgContainer = $('#serverResponse'),
-          log = $('#log');
-      searchForm.on('submit', function (e) {
-        e.preventDefault();
-        var url = $(this).attr('action');
-        var data = {
-          userArray : $('#userArray').val()
-        };
-        msgContainer.find('tbody').html('');
-        msgContainer.addClass('loading');
-        $.post(url, data);
-        log.html('<p>Traitement de la requête : </p>');
-      });
+      var listContainer = $('#list-users'),
+          users = ['258-56-0024-0','258-56-0011-1','258-56-0051-6','258-56-0031-0','258-56-0157-0','258-56-0111-3','258-56-0138-2','258-56-0163-6','253-56-0005-4','258-46-0288-0','258-56-0148-5','258-56-0008-5','258-56-0033-2','252-56-0018-2','258-56-0074-1','258-56-0091-4','258-56-0007-4','252-56-0014-5','256-56-0010-5','258-56-0046-1','257-N6-0003-2','258-56-0001-5','258-56-0107-6','258-56-0045-0','258-56-0130-1','256-56-0006-1','253-56-0008-0','258-56-0041-3','258-56-0188-3','258-56-0080-0','258-56-0003-0','258-56-0095-1','258-56-0039-1','258-56-0158-1','252-56-0011-2','258-56-0062-3','258-56-0162-5','258-56-0113-5','258-56-0090-3','258-56-0018-1','252-56-0007-5','258-56-0169-5','256-56-0018-6','256-56-0031-5','258-56-0027-3','258-56-0009-6','252-56-0016-0','256-56-0040-0','258-56-0038-0','252-56-0017-1','258-56-0029-5','258-56-0012-2','252-56-0010-1','258-56-0064-5','258-56-0015-5','258-56-0069-3','258-56-0065-6','256-56-0044-4','258-56-0101-0','256-56-0017-5','258-56-0144-1','258-56-0077-4','253-56-0002-1','252-56-0012-3','256-56-0004-6','256-56-0003-5','258-56-0155-5','258-56-0116-1','258-56-0005-2','258-56-0099-5','258-56-0032-1','256-56-0030-4','258-56-0066-0','258-56-0149-6','253-56-0006-5','258-56-0085-5','258-56-0109-1','258-56-0014-4','253-56-0001-0','258-56-0043-5','258-56-0093-6','258-56-0137-1','256-56-0029-3','258-56-0145-2','258-56-0072-6','258-56-0173-2','258-56-0117-2','251-56-0007-4','258-56-0152-2','256-56-0015-3','258-56-0183-5','258-56-0047-2','252-56-0005-3','258-56-0076-3','256-56-0042-2','258-56-0170-6','253-46-0023-3','256-56-0038-5','258-56-0174-3','258-56-0165-1','253-46-0027-0','259-56-0001-6','258-56-0084-4','256-56-0016-4','256-56-0019-0','258-56-0126-4','258-56-0125-3','258-56-0156-6','258-46-0283-2','258-56-0040-2','258-56-0131-2','258-56-0042-4','256-56-0001-3','258-56-0108-0','253-56-0007-6','258-56-0103-2'];
+
       // searchForm.on('submit', function (e) {
       //   e.preventDefault();
       //   var url = $(this).attr('action');
       //   $.post(url);
       // });
-      // $(document).on('click', 'td a', function (e) {
-      //   e.preventDefault();
-      //   console.log('clicked');
-      //   var url = 'userInfo/?id='+$(this).attr('href');
-      //   $.post(url);
-      // });
-      socket.on('user found', function(user){
-        console.log('Socket event received : ', user);
-        user = user.user;
-        var html = '<p class="user">'+user[0]+' '+user[1]+' '+user[2]+'</p>';
-
-        log.append(html);
-       });
-       socket.on('error GAEL', function(msg){
-         alert(msg.msg);
-      });
-      socket.on('list users ready', function(data){
-        console.log('Socket event received : ', data.data[0]);
+      $(document).ready(function(){
         var html = '';
-        for(var i = 0; i < data.data.length; i++){
-          html += '<tr><td><a href="/userInfo/?id='+data.data[i][0]+'">'+data.data[i][0]+'</a></td><td>'+data.data[i][1]+'</td><td>'+data.data[i][2]+'</td></tr>';
+        for(var i = 0; i < users.length; i++){
+          html += '<li><a href="/userInfo/?id='+'2-'+users[i]+'">'+'2-'+users[i]+'</a></li>'
         }
-        msgContainer.find('tbody').html(html);
-        msgContainer.removeClass('loading init');
-     });
+        listContainer.html(html);
+      });
     //  socket.on('list notes ready', function(data){
     //    console.log('Socket event received : ', data.copies);
     //    var statusMsg;
-    //
-    //    var html = '<h2>'+data.name+'</h2><table>';
+    //    nameContainer.html(data.name);
+    //    var html = '';
     //    for(var i = 0; i <data.copies.length; i++){
     //      if(data.copies[i].currentStatus === 'C'){
     //        statusMsg = 'Corrigée, note :'+data.copies[i].note;
@@ -129,9 +71,8 @@
     //      else {
     //        statusMsg = 'Pas encore corrigée';
     //      }
-    //      html += '<tr><td>'+data.copies[i].arrivedDay+'/'+data.copies[i].arrivedMonth+'/'+data.copies[i].arrivedYear+'</td><td>'+statusMsg+'</td><td>'+data.copies[i][2]+'</td></tr>';
+    //      html += '<tr><td>'+data.copies[i].arrivedDay+'/'+data.copies[i].arrivedMonth+'/'+data.copies[i].arrivedYear+'</td><td>'+statusMsg+'</td></tr>';
     //    }
-    //    html += '</table>';
     //    msgContainer.find('tbody').html(html);
     //    msgContainer.removeClass('loading init');
     // });

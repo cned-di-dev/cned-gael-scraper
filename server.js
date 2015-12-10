@@ -343,7 +343,7 @@ app.use(express.static(publicDir));
 
 // Server routes
 app.get("/", function (req, res) {
-  res.redirect('/usersList');
+  res.sendFile(publicDir+"/index.html");
 });
 
 app.post('/', function(req, res) {
@@ -354,11 +354,11 @@ app.post('/', function(req, res) {
 		data = [];
 		horsemanIterate(userArray);
 });
-app.get("/usersList", function (req, res) {
-
-	res.sendFile(publicDir+"/list-all-users.html");
-
-});
+// app.get("/usersList", function (req, res) {
+//
+// 	res.sendFile(publicDir+"/index.html");
+//
+// });
 
 // TODO: Handle post request to close session
 app.post('/closeSession', function(req, res) {
