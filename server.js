@@ -7,6 +7,7 @@ var http = require('http'),
  		bodyParser = require('body-parser'),
  		Horseman = require("node-horseman"),
  		$ = require('cheerio'),
+		phantomjs = require('phantomjs'),
 		port = 7777;
 
 // App vars & params
@@ -24,7 +25,9 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 		pages = 0,
  		horsemanIterate = function (arr) {
 			//console.log(i, arr.length);
-			horseman = new Horseman();
+			horseman = new Horseman({
+				phantomPath : phantomjs.path
+			});
 
 			 userID = arr[i].split('-');
 			horseman
@@ -164,7 +167,9 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 		},
 		horsemanGetUser = function (arr) {
 			//console.log(arr);
-			horseman = new Horseman();
+			horseman = new Horseman({
+				phantomPath : phantomjs.path
+			});
 
 			 userID = arr.split('-');
 			horseman
@@ -309,7 +314,9 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 
 		horsemanCloseSession = function () {
 
-			horseman = new Horseman();
+			horseman = new Horseman({
+				phantomPath : phantomjs.path
+			});
 
 			horseman
 			  .open(url)
@@ -336,7 +343,7 @@ app.use(express.static(publicDir));
 
 // Server routes
 app.get("/", function (req, res) {
-  res.sendFile(publicDir+"/list-all-users.html");
+  res.redirect('/usersList');
 });
 
 app.post('/', function(req, res) {
@@ -347,7 +354,7 @@ app.post('/', function(req, res) {
 		data = [];
 		horsemanIterate(userArray);
 });
-app.get("/userList", function (req, res) {
+app.get("/usersList", function (req, res) {
 
 	res.sendFile(publicDir+"/list-all-users.html");
 
