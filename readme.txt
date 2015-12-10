@@ -19,12 +19,12 @@ Installation :
     -- package.json
     -- server.js
     -- readme.txt
-    
 
 Lancement du programme :
 ------------------------
 - Allez dans le menu démarrer > Tous les programmes > Node.js > Node.js command prompt
 - Allez dans votre dossier nouvellement créé, en tapant : cd mon-nouveau-dossier
+- La première fois, tapez : npm install
 - Ensuite, tapez : node server.js
 - Normalement, le programme doit retourner : Gael Scraper is running on 127.0.0.1:7777 :)
 - Si c'est le cas, ouvrez un navigateur et tapez http://127.0.0.1:7777 ou si votre ordinateur est bien configuré : http://localhost:7777
