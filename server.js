@@ -247,9 +247,6 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 											allClasses = that.attr('class'),
 											regex = /(?:^|\W)line(\w+)(?!\w)/g,
 											line = '.'+regex.exec(allClasses)[0].replace(' ', '');
-
-
-
 										var copy = {
 											arrivedDay : jQuery(line+'.col52').val(),
 											arrivedMonth : jQuery(line+'.col55').val(),
@@ -354,11 +351,6 @@ app.post('/', function(req, res) {
 		data = [];
 		horsemanIterate(userArray);
 });
-// app.get("/usersList", function (req, res) {
-//
-// 	res.sendFile(publicDir+"/index.html");
-//
-// });
 
 // TODO: Handle post request to close session
 app.post('/closeSession', function(req, res) {
@@ -369,6 +361,10 @@ app.get('/closeSession', function(req, res) {
 		horsemanCloseSession();
 		res.sendFile(publicDir+"/close-session.html");
 });
+app.get('/usersJson', function(req, res) {
+
+		res.sendFile(publicDir+"/users.json");
+});
 app.get("/userInfo", function (req, res) {
 
 	userArray = req.query.id;
@@ -376,10 +372,6 @@ app.get("/userInfo", function (req, res) {
 
 	res.sendFile(publicDir+"/user-info.html");
 	horsemanGetUser(userArray);
-});
-app.post('/closeSession', function(req, res) {
-		horsemanCloseSession();
-		//res.sendFile("/index.html");
 });
 // Server launch
 server.listen(port, function () {

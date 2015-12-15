@@ -86,6 +86,9 @@
        msgContainer.find('tbody').html(html);
        msgContainer.removeClass('loading init');
     });
+    socket.on('error GAEL', function(data){
+    alert(data.msg);
+   });
     </script>
   </body>
 </html>
