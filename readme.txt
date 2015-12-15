@@ -35,3 +35,10 @@ Utilisation :
 - http://127.0.0.1:7777 (ou http://localhost:7777 ): la liste de l'échantillon d'inscrits
 - http://127.0.0.1:7777//userInfo/?id=2-251-56-0007-4 (ou 2-251-56-0007-4 est un identifiant d'inscrit) : permet d'accéder directement à une liste de notes d'inscrit
 - http://127.0.0.1:7777//closeSession : pour fermer la session à GAEL (ça reste toujours plus rapide que se logger sur GAEL pour taper BYE)
+
+
+FAQ :
+-----
+- Q: Sur la page de notes d'un inscrit, je n'ai ni notes, ni nom, que faire ?
+- R: Deux problèmes possibles : soit une session GAEL est déjà ouverte, soit GAEL est HS (Erreur de connexion au serveur TPX).
+Dans le premier cas, il faut fermer la session (soit manuellement, soit en allant à l'adresse http://127.0.0.1:7777//closeSession)
