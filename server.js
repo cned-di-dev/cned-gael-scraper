@@ -318,12 +318,24 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 			horseman
 			  .open(url)
 				// LOG
-			  .click('a:contains("8PDPTE01")')
+			  .click('#ListSessions a')
+				.waitForNextPage()
+				.type('[name="tdsmon"]', log.mon)
+				.type('[name="tdsuser"]', log.pass)
+				.type('[name="tdspasswd"]', log.pass)
+				.click('[name="DFH_ENTER"]')
+				.waitForNextPage()
+				.type('[name="F14_1"]', 'BYE')
+				.type('[name="F3_19"]', 'BYE')
+				.type('[name="F3_14"]', 'BYE')
+				.type('[name="F3_15"]', 'BYE')
 				.click('[name="DFH_ENTER"]')
 				.waitForNextPage()
 				.html()
 				.then(function(html){
+					console.log(html);
 					horseman.close();
+
 					console.info('GAEL Session closed');
 					io.emit('gael session closed');
 				})
