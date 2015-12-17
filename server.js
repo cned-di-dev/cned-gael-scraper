@@ -21,11 +21,16 @@ var	url = 'http://dglin038.cned.org:8080/TPXJ2EE/doLogon.jsp?1240,1024',
 		i = 0,
  		publicDir =  __dirname + '/public',
  		userArray,
+		usersAsJson = [],
+		usersNb = users.length,
  		data = [],
  		horseman,
 		userID,
 		pages = 0;
-
+function updateAndEmitProgression (i, usersNb) {
+		var percent = (parseInt(i)/parseInt(usersNb))*100;
+		io.emit('update progression', { percent : percent });
+}
 function horsemanGetUser (arr, iterate) {
 	//console.log(arr);
 	horseman = new Horseman({
@@ -155,21 +160,33 @@ function horsemanGetUser (arr, iterate) {
 
 													console.log('ok, closing session');
 													horseman
-														.viewport(800,600)
-														.screenshot('last-step.png')
 														.type('[name="F3_19"]', 'BYE')
 														.click('[name="DFH_ENTER"]')
 														.waitForNextPage()
 														.then(function(){
+
 															console.log('closing -> then');
+															console.log(i, users.length);
 															io.emit('list notes ready', { copies : copies, name : name});
-															i++;
+															var toPush = {
+																id: arr,
+																name: name,
+																copies: copies
+															};
+															usersAsJson.push(toPush);
+															updateAndEmitProgression(i, users.length);
 															if(iterate && i < users.length){
 																horsemanGetUser('2-'+users[i][0],true);
+																i++;
 															}
+															else {
+																io.emit('list all finished');
+																fs.writeFile(  __dirname + "/cache/users-"+Date.now()+".json", JSON.stringify( usersAsJson ), "utf8");
+															}
+
 														})
 														.close();
-													i++;
+
 
 												}
 											});
@@ -261,8 +278,9 @@ app.get('/usersJson', function(req, res) {
 });
 
 app.get('/listAllUsers', function(req, res) {
-		i = 0;
-		horsemanGetUser('2-'+users[i][0], true);
+		i = 1;
+		usersAsJson = [];
+		horsemanGetUser('2-'+users[0][0], true);
 		res.sendFile(publicDir+"/all-users-info.html");
 });
 

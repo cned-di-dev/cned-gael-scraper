@@ -9,16 +9,36 @@
         line-height: 3;
       }
       .container {
-        max-width: 50%;
+        max-width: 70%;
         margin: 0 auto;
       }
-      body.loading {
-        background: url('http://i1.wp.com/cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif?resize=48%2C48') center left no-repeat;
+      .loader {
+        display: none;
+        background: url('http://i1.wp.com/cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif?resize=48%2C48') center center no-repeat;
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+      }
+      #percent {
+        display: block;
+        text-align: center;
+        margin-top: 100px;
+      }
+      body.loading .loader{
+        display: block;
       }
 
-        #serverResponse.loading table, #serverResponse.init table{
-            display: none;
-        }
+      .table thead tr:first-child {
+        cursor: pointer;
+      }
+      .table thead tr:last-child th {
+        width: 40%;
+      }
+      .hidden {
+        display: none;
+      }
       #log {
         position: fixed;
         bottom: 0;
@@ -30,9 +50,12 @@
     </style>
   </head>
   <body class="loading">
+    <div class="loader">
+      <span id="percent">0%</span>
+    </div>
     <main class="container">
       <h1 class="title text-center">CNED GAEL Scraper</h1>
-      <h2>Chargement de tous les utilisateurs (très long, chaque utilisateur va s'afficher au fur et à mesure).</h2>
+      <p class="alert alert-info text-center">Chargement de tous les inscrits (/public/users.json).</p>
       <div class="row" id="serverResponse">
 
       </div>
@@ -57,34 +80,52 @@
       // });
 
 
-
+      $(document).on('click', '.table thead tr:first-child', function (e) {
+          e.preventDefault();
+          var table = $(this).parents('.table'),
+              toHide = table.find('thead tr:last-child, tbody');
+          toHide.toggleClass('hidden');
+      });
      socket.on('list notes ready', function(data){
        console.log('Socket event received : ', data.copies);
        var statusMsg;
-       var html = '<table  class="table table-striped">';
-       html += '<thead>';
-       html += '<tr><th colspan="2">'+data.name+'</th></tr>';
-       html += '<tr><th>Date de dépôt de la copie</th><th>Statut</th></tr>';
-       html += '</thead>';
-       html += '<tbody>';
 
-       for(var i = 0; i <data.copies.length; i++){
-         if(data.copies[i].currentStatus === 'C'){
-           statusMsg = 'Corrigée, note :'+data.copies[i].note;
+       if(data.copies.length){
+         var html = '';
+         html += '<table  class="table table-striped">';
+         html += '<thead>';
+         html += '<tr><th colspan="2">'+data.name+'</th></tr>';
+         html += '<tr class="hidden"><th>Date de dépôt de la copie</th><th>Statut</th></tr>';
+         html += '</thead>';
+         html += '<tbody class="hidden">';
+
+         for(var i = 0; i <data.copies.length; i++){
+           if(data.copies[i].currentStatus === 'C'){
+             statusMsg = 'Corrigée, note :'+data.copies[i].note;
+           }
+           else {
+             statusMsg = 'Pas encore corrigée';
+           }
+           html += '<tr><td>'+data.copies[i].arrivedDay+'/'+data.copies[i].arrivedMonth+'/'+data.copies[i].arrivedYear+'</td><td>'+statusMsg+'</td></tr>';
          }
-         else {
-           statusMsg = 'Pas encore corrigée';
-         }
-         html += '<tr><td>'+data.copies[i].arrivedDay+'/'+data.copies[i].arrivedMonth+'/'+data.copies[i].arrivedYear+'</td><td>'+statusMsg+'</td></tr>';
+         html += '</tbody></table>';
+         msgContainer.append(html);
        }
-       html += '</tbody></table>';
-       msgContainer.append(html);
+       else {
+         console.log(data.name +' : Pas de copies.');
+       }
 
        i++;
 
 
     });
-
+    socket.on('update progression', function(prog){
+        $('#percent').text(parseInt(prog.percent)+'%');
+    });
+    socket.on('list all finished', function(){
+    $('body').removeClass('loading');
+    alert('Toutes les données ont été récupérés.');
+   });
     socket.on('error GAEL', function(data){
     alert(data.msg);
    });
