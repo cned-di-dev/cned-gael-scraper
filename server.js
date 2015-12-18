@@ -10,8 +10,8 @@ var http = require('http'),
  		$ = require('cheerio'),
 		phantomjs = require('phantomjs'),
 		port = process.argv[2] || 7777,
-		conf = require('data/conf.json'),
-		users = JSON.parse(fs.readFileSync( __dirname + '/data/users.json', 'utf8'));
+		conf = require('./data/conf.json'),
+		users = require('./data/users.json');
 
 
 // App vars & params
@@ -234,7 +234,7 @@ app.get('/closeSession', function(req, res) {
 		res.sendFile(publicDir+"/close-session.html");
 });
 app.get('/usersJson', function(req, res) {
-		res.sendFile(publicDir+"/users.json");
+		res.send(users);
 });
 app.get('/listAllUsers', function(req, res) {
 		i = 1;
